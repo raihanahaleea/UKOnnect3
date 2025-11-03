@@ -22,56 +22,66 @@ class MainActivity : ComponentActivity() {
         setContent {
             UKOnnect2Theme {
                 val navController = rememberNavController()
-                val peminjamanVM: PeminjamanViewModel = viewModel()   // ViewModel dibagikan ke semua screen
+                val peminjamanVM: PeminjamanViewModel = viewModel()
 
-                Scaffold(
-                    bottomBar = {
-                        BottomNavBar(
-                            currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route,
-                            onNavigate = { route ->
-                                navController.navigate(route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
+                // 🔹 Root Navigasi — mulai dari login
+                NavHost(
+                    navController = navController,
+                    startDestination = "login"
+                ) {
+
+                    // 🔐 LOGIN SCREEN
+                    composable("login") {
+                        LoginScreen(
+                            onLoginSuccess = {
+                                // ✅ Pindah ke halaman utama dengan BottomNav
+                                navController.navigate("main") {
+                                    popUpTo("login") { inclusive = true }
                                 }
                             }
                         )
                     }
-                ) { inner ->
-                    NavHost(
-                        navController = navController,
-                        startDestination = "beranda",
-                        modifier = Modifier.padding(inner)
-                    ) {
 
-                        // 🏠 Beranda (MainScreen)
-                        composable("beranda") {
-                            MainScreen(
-                                peminjamanVM = peminjamanVM,
-                                onGoPinjam = { navController.navigate("pinjam") },
-                                onGoAbsensi = { navController.navigate("absensi") } // ✅ navigasi ke absensi
-                            )
-                        }
+                    // 🏠 MAIN SCREEN DENGAN BOTTOM NAV
+                    composable("main") {
+                        val innerNav = rememberNavController()
 
-                        // 📅 Aktivitas
-                        composable("aktivitas") { AktivitasScreen() }
-
-                        // 🛒 Pinjam
-                        composable("pinjam") {
-                            PinjamScreen(viewModel = peminjamanVM)
-                        }
-
-                        // 🖼️ Galeri
-                        composable("galeri") { GaleriScreen() }
-
-                        // 👤 Profil
-                        composable("profil") { ProfilScreen() }
-
-                        // 🧾 Absensi (baru ditambahkan)
-                        composable("absensi") {
-                            AbsensiScreen(onBack = { navController.popBackStack() })
+                        Scaffold(
+                            bottomBar = {
+                                BottomNavBar(
+                                    currentRoute = innerNav.currentBackStackEntryAsState().value?.destination?.route,
+                                    onNavigate = { route ->
+                                        innerNav.navigate(route) {
+                                            popUpTo(innerNav.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                )
+                            }
+                        ) { innerPadding ->
+                            NavHost(
+                                navController = innerNav,
+                                startDestination = "beranda",
+                                modifier = Modifier.padding(innerPadding)
+                            ) {
+                                composable("beranda") {
+                                    MainScreen(
+                                        peminjamanVM = peminjamanVM,
+                                        onGoPinjam = { innerNav.navigate("pinjam") },
+                                        onGoAbsensi = { innerNav.navigate("absensi") }
+                                    )
+                                }
+                                composable("aktivitas") { AktivitasScreen() }
+                                composable("pinjam") { PinjamScreen(viewModel = peminjamanVM) }
+                                composable("galeri") { GaleriScreen() }
+                                composable("profil") { ProfilScreen() }
+                                composable("absensi") {
+                                    AbsensiScreen(onBack = { innerNav.popBackStack() })
+                                }
+                            }
                         }
                     }
                 }
