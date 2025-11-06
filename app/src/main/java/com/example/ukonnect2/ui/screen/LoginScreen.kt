@@ -102,7 +102,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(0.85f)
             )
 
-            // 🔘 Tombol Login
+
             Button(
                 onClick = {
                     if (username == "anggota" && password == "uko123") {
@@ -121,7 +121,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 Text("Login", fontSize = 18.sp, color = Color.White)
             }
 
-            // ⚠️ Pesan Error
+
             if (errorMessage.isNotEmpty()) {
                 Text(errorMessage, color = Color.Red, fontSize = 14.sp)
             }

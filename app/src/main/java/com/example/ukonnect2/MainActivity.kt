@@ -1,6 +1,7 @@
 package com.example.ukonnect2
 
 import android.os.Bundle
+import android.widget.Toast // 👈 Pastikan import ini ada
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             UKOnnect2Theme {
-                val navController = rememberNavController()
+                val navController = rememberNavController() // 👈 Controller LUAR
                 val peminjamanVM: PeminjamanViewModel = viewModel()
 
                 // 🔹 Root Navigasi — mulai dari login
@@ -34,7 +35,6 @@ class MainActivity : ComponentActivity() {
                     composable("login") {
                         LoginScreen(
                             onLoginSuccess = {
-                                // ✅ Pindah ke halaman utama dengan BottomNav
                                 navController.navigate("main") {
                                     popUpTo("login") { inclusive = true }
                                 }
@@ -42,14 +42,15 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // 🏠 MAIN SCREEN DENGAN BOTTOM NAV
+                    // 🏠 MAIN SCREEN (dengan BottomNav)
                     composable("main") {
-                        val innerNav = rememberNavController()
+                        val innerNav = rememberNavController() // 👈 Controller DALAM
 
                         Scaffold(
                             bottomBar = {
                                 BottomNavBar(
                                     currentRoute = innerNav.currentBackStackEntryAsState().value?.destination?.route,
+                                    // (A) Navigasi tab biasa pakai innerNav
                                     onNavigate = { route ->
                                         innerNav.navigate(route) {
                                             popUpTo(innerNav.graph.findStartDestination().id) {
@@ -58,10 +59,15 @@ class MainActivity : ComponentActivity() {
                                             launchSingleTop = true
                                             restoreState = true
                                         }
+                                    },
+                                    // (B) Navigasi FAB Absen pakai navController LUAR
+                                    onAbsenClick = {
+                                        navController.navigate("qr_scanner")
                                     }
                                 )
                             }
                         ) { innerPadding ->
+                            // NavHost DALAM ini tidak berubah
                             NavHost(
                                 navController = innerNav,
                                 startDestination = "beranda",
@@ -71,7 +77,10 @@ class MainActivity : ComponentActivity() {
                                     MainScreen(
                                         peminjamanVM = peminjamanVM,
                                         onGoPinjam = { innerNav.navigate("pinjam") },
-                                        onGoAbsensi = { innerNav.navigate("absensi") }
+                                        onGoAbsensi = { innerNav.navigate("absensi") },
+                                        onGoProfil = { innerNav.navigate("profil") },
+                                        onGoAktivitas = { innerNav.navigate("aktivitas") },
+                                        onGoBeranda = { innerNav.navigate("beranda") }
                                     )
                                 }
                                 composable("aktivitas") { AktivitasScreen() }
@@ -79,10 +88,30 @@ class MainActivity : ComponentActivity() {
                                 composable("galeri") { GaleriScreen() }
                                 composable("profil") { ProfilScreen() }
                                 composable("absensi") {
-                                    AbsensiScreen(onBack = { innerNav.popBackStack() })
+                                    AbsensiScreen(
+                                        onBack = { innerNav.popBackStack() }
+                                    )
                                 }
                             }
                         }
+                    }
+
+                    // ⭐️ RUTE FULL-SCREEN BARU ⭐️
+                    // Ini adalah rute full-screen di luar 'main'
+                    composable("qr_scanner") {
+                        QrScannerScreen(
+                            onBack = {
+                                navController.popBackStack() // Kembali pakai navController
+                            },
+                            // Menangani apa yang terjadi SETELAH scan berhasil
+                            onQrCodeScanned = { qrValue ->
+                                // 1. Tampilkan hasil
+                                Toast.makeText(applicationContext, "Hasil Scan: $qrValue", Toast.LENGTH_LONG).show()
+
+                                // 2. Tutup layar scanner
+                                navController.popBackStack()
+                            }
+                        )
                     }
                 }
             }

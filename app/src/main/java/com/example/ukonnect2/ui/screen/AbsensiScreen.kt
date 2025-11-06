@@ -51,29 +51,6 @@ fun AbsensiScreen(onBack: () -> Unit) {
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            // 🔶 Tombol besar Scan QR Kehadiran
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-                    .background(Color(0xFFFF9800), RoundedCornerShape(16.dp))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_qr),
-                        contentDescription = "Scan QR Kehadiran",
-                        tint = Color.White,
-                        modifier = Modifier.size(60.dp)
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = "Scan QR Kehadiran",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
                 }
             }
 
@@ -102,8 +79,7 @@ fun AbsensiScreen(onBack: () -> Unit) {
                 }
             }
         }
-    }
-}
+
 
 data class AbsensiItem(
     val tanggal: String,

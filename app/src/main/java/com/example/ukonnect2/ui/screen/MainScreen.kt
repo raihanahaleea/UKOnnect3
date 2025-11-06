@@ -1,13 +1,10 @@
 package com.example.ukonnect2.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,103 +12,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ukonnect2.R
 
-@Composable
-fun MainScreen(
-    peminjamanVM: PeminjamanViewModel,
-    onGoPinjam: () -> Unit,
-    onGoAbsensi: () -> Unit
-)
- {
-    val jumlahDipinjam = peminjamanVM.loansAktif().sumOf { it.jumlah }
+// ✅ Data class untuk item navbar
+data class NavbarItem(val label: String, val icon: Int)
 
-    Scaffold(containerColor = Color(0xFFF8FAFB)) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-                .fillMaxSize()
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        modifier = Modifier.size(50.dp),
-                        shape = CircleShape,
-                        color = Color(0xFFFFE0B2)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_profile),
-                            contentDescription = "Profile",
-                            tint = Color(0xFFFF9800),
-                            modifier = Modifier.padding(10.dp)
-                        )
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = "Selamat Datang, Saringan!",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1B1B1B)
-                    )
-                }
-                IconButton(onClick = { }) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifikasi",
-                        tint = Color(0xFF1B1B1B)
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Column {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    StatCard("15", "Aktivitas Diikuti", R.drawable.ic_calendar)
-                    StatCard("95%", "Total Kehadiran", R.drawable.ic_check)
-                }
-                Spacer(Modifier.height(16.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    StatCard(jumlahDipinjam.toString(), "Alat Dipinjam", R.drawable.ic_ball)
-                    StatCard("48", "Foto di Galeri", R.drawable.ic_gallery)
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Text(
-                text = "Aksi Cepat",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1B1B1B)
-            )
-            Spacer(Modifier.height(12.dp))
-
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                QuickActionButton(
-                    label = "Scan QR Absen",
-                    icon = R.drawable.ic_qr,
-                    background = Color(0xFFFF9800),
-                    textColor = Color.White,
-                    onClick = onGoAbsensi
-                )
-                QuickActionButton(
-                    label = "Pinjam Alat",
-                    icon = R.drawable.ic_cart,
-                    background = Color(0xFFFFE0B2),
-                    textColor = Color(0xFFFF9800),
-                    onClick = onGoPinjam
-                )
-            }
-        }
-    }
-}
-
+// ✅ Fungsi kartu statistik
 @Composable
 fun StatCard(value: String, label: String, icon: Int) {
     Card(
@@ -139,6 +46,7 @@ fun StatCard(value: String, label: String, icon: Int) {
     }
 }
 
+// ✅ Fungsi tombol aksi cepat
 @Composable
 fun QuickActionButton(
     label: String,
@@ -149,7 +57,10 @@ fun QuickActionButton(
 ) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = background, contentColor = textColor),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = background,
+            contentColor = textColor
+        ),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .width(160.dp)
@@ -163,7 +74,193 @@ fun QuickActionButton(
                 modifier = Modifier.size(22.dp)
             )
             Spacer(Modifier.width(8.dp))
-            Text(text = label, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = label,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+// ✅ MainScreen
+@Composable
+fun MainScreen(
+    peminjamanVM: PeminjamanViewModel = viewModel(),
+    onGoPinjam: () -> Unit,
+    onGoAbsensi: () -> Unit,
+    onGoProfil: () -> Unit,
+    onGoAktivitas: () -> Unit,
+    onGoBeranda: () -> Unit
+) {
+    val jumlahDipinjam = peminjamanVM.loansAktif().sumOf { it.jumlah }
+
+    Scaffold(
+        containerColor = Color(0xFFF8FAFB),
+
+        // 🔻 Bagian BottomAppBar dinonaktifkan karena sudah diatur di MainActivity
+        /*
+        bottomBar = {
+            BottomAppBar(
+                containerColor = Color.White,
+                tonalElevation = 8.dp
+            ) {
+                val items = listOf(
+                    NavbarItem("Beranda", R.drawable.ic_home),
+                    NavbarItem("Aktivitas", R.drawable.ic_calendar),
+                    NavbarItem("Absen", R.drawable.ic_qr),
+                    NavbarItem("Pinjam", R.drawable.ic_cart),
+                    NavbarItem("Profil", R.drawable.ic_profile)
+                )
+
+                items.forEachIndexed { index, item ->
+                    if (index == 2) {
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            FloatingActionButton(
+                                onClick = onGoAbsensi,
+                                containerColor = Color(0xFFFF9800),
+                                shape = CircleShape,
+                                modifier = Modifier
+                                    .size(65.dp)
+                                    .offset(y = (-20).dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = item.icon),
+                                    contentDescription = item.label,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        NavigationBarItem(
+                            selected = false,
+                            onClick = {
+                                when (index) {
+                                    0 -> onGoBeranda()
+                                    1 -> onGoAktivitas()
+                                    3 -> onGoPinjam()
+                                    4 -> onGoProfil()
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = item.icon),
+                                    contentDescription = item.label,
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = item.label,
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            },
+                            alwaysShowLabel = true
+                        )
+                    }
+                }
+            }
+        }
+        */
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+                .fillMaxSize()
+        ) {
+            // 🔹 HEADER
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        modifier = Modifier.size(50.dp),
+                        shape = CircleShape,
+                        color = Color(0xFFFFE0B2)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_profile),
+                            contentDescription = "Profile",
+                            tint = Color(0xFFFF9800),
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "Selamat Datang, Saringan!",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1B1B1B)
+                    )
+                }
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_notif),
+                    contentDescription = "Notifikasi",
+                    tint = Color(0xFF1B1B1B),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // 🔹 STATISTIK
+            Column {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    StatCard("15", "Aktivitas Diikuti", R.drawable.ic_calendar)
+                    StatCard("95%", "Total Kehadiran", R.drawable.ic_check)
+                }
+                Spacer(Modifier.height(16.dp))
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    StatCard(jumlahDipinjam.toString(), "Alat Dipinjam", R.drawable.ic_ball)
+                    StatCard("48", "Foto di Galeri", R.drawable.ic_gallery)
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // 🔹 AKSI CEPAT
+            Text(
+                text = "Aksi Cepat",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1B1B1B)
+            )
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                QuickActionButton(
+                    label = "Riwayat Absensi",
+                    icon = R.drawable.ic_qr,
+                    background = Color(0xFFFF9800),
+                    textColor = Color.White,
+                    onClick = onGoAbsensi
+                )
+                QuickActionButton(
+                    label = "Pinjam Alat",
+                    icon = R.drawable.ic_cart,
+                    background = Color(0xFFFFE0B2),
+                    textColor = Color(0xFFFF9800),
+                    onClick = onGoPinjam
+                )
+            }
         }
     }
 }

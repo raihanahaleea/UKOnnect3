@@ -61,6 +61,19 @@ dependencies {
     // ✅ Activity Compose (untuk setContent)
     implementation("androidx.activity:activity-compose:1.9.3")
 
+    // Versi dapat bervariasi, gunakan versi stabil terbaru
+    val cameraxVersion = "1.3.1"
+    val mlkitVersion = "17.2.0"
+
+// CameraX
+    implementation("androidx.camera:camera-core:${cameraxVersion}")
+    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
+    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
+    implementation("androidx.camera:camera-view:${cameraxVersion}") // Untuk PreviewView
+
+// ML Kit Barcode Scanning
+    implementation("com.google.mlkit:barcode-scanning:${mlkitVersion}")
+
     // ✅ Library versi dari catalog libs.versions.toml
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
